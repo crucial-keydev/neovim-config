@@ -1,7 +1,9 @@
 return {
   'nvim-treesitter/nvim-treesitter',
   branch = 'master', -- Kept as requested to prevent regression
-  build = ':TSUpdate',
+  build = function()
+    require('nvim-treesitter.install').update { with_sync = true }()
+  end,
   dependencies = {
     {
       'nvim-treesitter/nvim-treesitter-textobjects',

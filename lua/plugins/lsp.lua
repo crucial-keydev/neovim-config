@@ -171,9 +171,8 @@ return {
     require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
     -- INITIALIZATION
-    -- This is the core 0.11 change:
-    -- 1. Define the config using `vim.lsp.config` (replaces lspconfig.setup)
-    -- 2. Enable the client using `vim.lsp.enable` (activates filetype detection)
+    -- 1. Define the config using `vim.lsp.config`
+    -- 2. Enable the client using `vim.lsp.enable`
     for server, cfg in pairs(servers) do
       cfg.capabilities = vim.tbl_deep_extend('force', {}, capabilities, cfg.capabilities or {})
 

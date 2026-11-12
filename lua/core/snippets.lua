@@ -1,14 +1,17 @@
--- Custom code snippets for different purposes
+-- Custom code snippets and global behaviors
+
+local hl = vim.hl or vim.highlight
 
 -- Prevent LSP from overwriting treesitter color settings
 -- https://github.com/NvChad/NvChad/issues/1907
-vim.hl.priorities.semantic_tokens = 95 -- Or any number lower than 100, treesitter's priority level
+if hl and hl.priorities then
+  hl.priorities.semantic_tokens = 95 -- Lower than 100 (treesitter's priority level)
+end
 
 -- Appearance of diagnostics
 vim.diagnostic.config {
   virtual_text = {
     prefix = '●',
-    -- Add a custom format function to show error codes
     format = function(diagnostic)
       local code = diagnostic.code and string.format('[%s]', diagnostic.code) or ''
       return string.format('%s %s', code, diagnostic.message)
@@ -17,7 +20,7 @@ vim.diagnostic.config {
   underline = false,
   update_in_insert = true,
   float = {
-    source = true, -- Or "if_many"
+    source = true,
   },
   signs = {
     text = {
@@ -27,27 +30,40 @@ vim.diagnostic.config {
       [vim.diagnostic.severity.HINT] = '󰌵 ',
     },
   },
-  -- Make diagnostic background transparent
-  on_ready = function()
-    vim.cmd 'highlight DiagnosticVirtualText guibg=NONE'
-  end,
 }
+
+-- Make diagnostic virtual text background transparent across colorschemes
+vim.api.nvim_create_autocmd('ColorScheme', {
+  group = vim.api.nvim_create_augroup('DiagnosticHighlight', { clear = true }),
+  callback = function()
+    vim.api.nvim_set_hl(0, 'DiagnosticVirtualTextError', { bg = 'NONE', default = true })
+    vim.api.nvim_set_hl(0, 'DiagnosticVirtualTextWarn', { bg = 'NONE', default = true })
+    vim.api.nvim_set_hl(0, 'DiagnosticVirtualTextInfo', { bg = 'NONE', default = true })
+    vim.api.nvim_set_hl(0, 'DiagnosticVirtualTextHint', { bg = 'NONE', default = true })
+  end,
+})
 
 -- Highlight on yank
 local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
 vim.api.nvim_create_autocmd('TextYankPost', {
   callback = function()
-    vim.hl.on_yank()
+    if hl and hl.on_yank then
+      hl.on_yank()
+    end
   end,
   group = highlight_group,
   pattern = '*',
 })
 
--- Set kitty terminal padding to 0 when in nvim
-vim.cmd [[
-  augroup kitty_mp
-  autocmd!
-  au VimLeave * :silent !kitty @ set-spacing padding=default margin=default
-  au VimEnter * :silent !kitty @ set-spacing padding=0 margin=0 3 0 3
-  augroup END
-]]
+-- Set kitty terminal padding to 0 when in nvim (only runs inside Kitty)
+if vim.env.KITTY_WINDOW_ID then
+  local kitty_group = vim.api.nvim_create_augroup('kitty_mp', { clear = true })
+  vim.api.nvim_create_autocmd('VimEnter', {
+    group = kitty_group,
+    command = 'silent !kitty @ set-spacing padding=0 margin=0 3 0 3',
+  })
+  vim.api.nvim_create_autocmd('VimLeave', {
+    group = kitty_group,
+    command = 'silent !kitty @ set-spacing padding=default margin=default',
+  })
+end

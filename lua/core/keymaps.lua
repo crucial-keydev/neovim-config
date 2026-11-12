@@ -17,19 +17,19 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
--- clear highlights
+-- Clear highlights
 vim.keymap.set('n', '<Esc>', ':noh<CR>', opts)
 
--- save file
-vim.keymap.set('n', '<C-s>', '<cmd> w <CR>', opts)
+-- Save file
+vim.keymap.set('n', '<C-s>', '<cmd>w<CR>', opts)
 
--- save file without auto-formatting
-vim.keymap.set('n', '<leader>sn', '<cmd>noautocmd w <CR>', opts)
+-- Save file without auto-formatting
+vim.keymap.set('n', '<leader>sn', '<cmd>noautocmd w<CR>', opts)
 
--- quit file
-vim.keymap.set('n', '<C-q>', '<cmd> q <CR>', opts)
+-- Quit file
+vim.keymap.set('n', '<C-q>', '<cmd>q<CR>', opts)
 
--- delete single character without copying into register
+-- Delete single character without copying into register
 vim.keymap.set('n', 'x', '"_x', opts)
 
 -- Vertical scroll and center
@@ -49,9 +49,9 @@ vim.keymap.set('n', '<Right>', ':vertical resize +2<CR>', opts)
 -- Buffers
 vim.keymap.set('n', '<Tab>', ':bnext<CR>', opts)
 vim.keymap.set('n', '<S-Tab>', ':bprevious<CR>', opts)
-vim.keymap.set('n', '<C-i>', '<C-i>', opts) -- to restore jump forward
+vim.keymap.set('n', '<C-i>', '<C-i>', opts) -- restore jump forward
 vim.keymap.set('n', '<leader>x', ':Bdelete!<CR>', opts) -- close buffer
-vim.keymap.set('n', '<leader>b', '<cmd> enew <CR>', opts) -- new buffer
+vim.keymap.set('n', '<leader>b', '<cmd>enew<CR>', opts) -- new buffer
 
 -- Increment/decrement numbers
 vim.keymap.set('n', '<leader>+', '<C-a>', opts) -- increment
@@ -72,13 +72,13 @@ vim.keymap.set('n', '<C-l>', ':wincmd l<CR>', opts)
 -- Tabs
 vim.keymap.set('n', '<leader>to', ':tabnew<CR>', opts) -- open new tab
 vim.keymap.set('n', '<leader>tx', ':tabclose<CR>', opts) -- close current tab
-vim.keymap.set('n', '<leader>tn', ':tabn<CR>', opts) --  go to next tab
-vim.keymap.set('n', '<leader>tp', ':tabp<CR>', opts) --  go to previous tab
+vim.keymap.set('n', '<leader>tn', ':tabn<CR>', opts) -- go to next tab
+vim.keymap.set('n', '<leader>tp', ':tabp<CR>', opts) -- go to previous tab
 
 -- Toggle line wrapping
 vim.keymap.set('n', '<leader>lw', '<cmd>set wrap!<CR>', opts)
 
--- Press jk fast to exit insert mode
+-- Press jk/kj fast to exit insert mode
 vim.keymap.set('i', 'jk', '<ESC>', opts)
 vim.keymap.set('i', 'kj', '<ESC>', opts)
 
@@ -100,26 +100,34 @@ vim.keymap.set('n', '<leader>j', '*``cgn', opts)
 vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]])
 vim.keymap.set('n', '<leader>Y', [["+Y]])
 
--- Toggle diagnostics
+-- Toggle diagnostics (compatible with Nvim 0.9, 0.10, and 0.11+)
 local diagnostics_active = true
-
 vim.keymap.set('n', '<leader>do', function()
   diagnostics_active = not diagnostics_active
-
-  if diagnostics_active then
-    vim.diagnostic.enable(true)
+  if vim.diagnostic.enable then
+    vim.diagnostic.enable(diagnostics_active)
+  elseif diagnostics_active then
+    vim.diagnostic.show()
   else
-    vim.diagnostic.enable(false)
+    vim.diagnostic.hide()
   end
-end)
+end, { desc = 'Toggle diagnostics' })
 
--- Diagnostic keymaps
+-- Diagnostic keymaps (compatible with Nvim 0.10 and 0.11+)
 vim.keymap.set('n', '[d', function()
-  vim.diagnostic.jump { count = -1, float = true }
+  if vim.diagnostic.jump then
+    vim.diagnostic.jump { count = -1, float = true }
+  else
+    vim.diagnostic.goto_prev { float = true }
+  end
 end, { desc = 'Go to previous diagnostic message' })
 
 vim.keymap.set('n', ']d', function()
-  vim.diagnostic.jump { count = 1, float = true }
+  if vim.diagnostic.jump then
+    vim.diagnostic.jump { count = 1, float = true }
+  else
+    vim.diagnostic.goto_next { float = true }
+  end
 end, { desc = 'Go to next diagnostic message' })
 
 vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
