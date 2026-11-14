@@ -99,6 +99,9 @@ vim.keymap.set('n', '<leader>j', '*``cgn', opts)
 -- Explicitly yank to system clipboard (highlighted and entire row)
 vim.keymap.set({ 'n', 'v' }, '<leader>y', [["+y]])
 vim.keymap.set('n', '<leader>Y', [["+Y]])
+-- Indents --
+vim.keymap.set('v', '<Tab>', '>gv', { desc = 'Indent selection right' })
+vim.keymap.set('v', '<S-Tab>', '<gv', { desc = 'Indent selection left' })
 
 -- Toggle diagnostics (compatible with Nvim 0.9, 0.10, and 0.11+)
 local diagnostics_active = true
